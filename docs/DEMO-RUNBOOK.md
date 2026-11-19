@@ -55,7 +55,9 @@ node scripts/reset-demo.mjs --yes
 
 This restores `src/`, `tests/`, `reports/`, `.github/` and `work-items/` to `demo-baseline`, removes new files in
 those paths, restores parked context and deletes local `demo/*` branches. Commit or copy work you want to keep first.
-It leaves scripts, docs, local MCP configuration, installed dependencies and build output alone.
+It leaves the root `index.html` handout, scripts, docs, local MCP configuration, installed dependencies and build
+output alone, even when the handout was added after `demo-baseline`. The scripts do not rebase branches or reset
+branch history; reset restores only the listed exercise paths.
 Restart the API after restoring C# code; its in-memory data also resets on restart.
 
 ## Compare insufficient and sufficient context

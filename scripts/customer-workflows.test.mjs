@@ -68,8 +68,13 @@ function script(root, name, ...args) {
 
 test('review setup uses the retained fixture and cleanup returns to the original branch', (t) => {
   const { root } = repository(t);
+  const handout = '<title>Customer handout</title>\n';
+  write(root, ['index.html'], handout);
+  run(root, 'git', ['add', '--', 'index.html']);
+  run(root, 'git', ['commit', '--quiet', '-m', `Add customer handout after baseline${trailer}`]);
   script(root, 'demo', 'review-setup');
   assert.equal(run(root, 'git', ['branch', '--show-current']), 'demo/settle-claim');
+  assert.equal(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), handout);
   assert.deepEqual(run(root, 'git', ['diff', '--name-only', 'main...HEAD']).split(/\r?\n/), [
     'src/ClaimsDesk.Api/Claims/SettlementEndpoints.cs',
     'src/ClaimsDesk.Api/Program.cs',
@@ -78,6 +83,7 @@ test('review setup uses the retained fixture and cleanup returns to the original
   assert.equal(run(root, 'git', ['branch', '--show-current']), 'main');
   assert.equal(run(root, 'git', ['branch', '--list', 'demo/*']), '');
   assert.equal(run(root, 'git', ['status', '--porcelain']), '');
+  assert.equal(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), handout);
 });
 
 test('context can be restored and reset still returns exercise paths to the baseline', (t) => {
@@ -96,8 +102,34 @@ test('context can be restored and reset still returns exercise paths to the base
   assert.equal(run(root, 'git', ['status', '--porcelain']), '');
 });
 
+for (const tracked of [false, true]) {
+  test(`reset preserves ${tracked ? 'modified tracked' : 'untracked'} root index.html added after the baseline`, (t) => {
+    const { root } = repository(t);
+    write(root, ['index.html'], '<title>Published handout</title>\n');
+    if (tracked) {
+      run(root, 'git', ['add', '--', 'index.html']);
+      run(root, 'git', ['commit', '--quiet', '-m', `Add customer handout after baseline${trailer}`]);
+    }
+    const handout = '<title>Customer handout with local edits</title>\r\n';
+    write(root, ['index.html'], handout);
+    for (const branch of ['main', 'demo/preserve-handout']) {
+      if (branch !== 'main') {
+        run(root, 'git', ['switch', '--quiet', '--create', branch]);
+      }
+      write(root, ['src', 'ClaimsDesk.Api', 'Program.cs'], 'exercise changes\n');
+      script(root, 'reset-demo', '--yes');
+      assert.equal(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), handout);
+      assert.equal(fs.readFileSync(path.join(root, 'src', 'ClaimsDesk.Api', 'Program.cs'), 'utf8'), 'baseline\n');
+      assert.equal(run(root, 'git', ['branch', '--show-current']), 'main');
+      assert.equal(run(root, 'git', ['branch', '--list', 'demo/*']), '');
+    }
+  });
+}
+
 test('split repositories retain their templates without copying exercise tooling into the API', (t) => {
   const { root, split } = repository(t);
+  const handout = '<title>Customer handout</title>\n';
+  write(root, ['index.html'], handout);
   script(root, 'split-repos', '--out', split);
   const api = path.join(split, 'claimsdesk-api');
   const web = path.join(split, 'claimsdesk-web');
@@ -118,6 +150,7 @@ test('split repositories retain their templates without copying exercise tooling
   write(api, ['stale-output.txt'], 'replace on request\n');
   script(root, 'split-repos', '--out', split, '--force');
   assert.equal(fs.existsSync(path.join(api, 'stale-output.txt')), false);
+  assert.equal(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), handout);
 });
 
 test('split refuses a copy without Git before replacing existing output', (t) => {

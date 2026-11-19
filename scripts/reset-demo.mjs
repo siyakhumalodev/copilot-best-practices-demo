@@ -26,8 +26,8 @@ import { bold, confirm, dim, exitWithError, info, ok, parseCommandLine } from '.
 const usage = `Usage: node scripts/reset-demo.mjs [--yes]
 
 Restores ${resetPaths.map((folder) => `${folder}/`).join(', ')} to the '${baselineTag}' tag, turns repository
-context back on, and leaves and deletes demo/* branches. Local MCP configuration, node_modules and build output
-are kept.
+context back on, and leaves and deletes demo/* branches. Root index.html, local MCP configuration, node_modules
+and build output are kept.
 
   -y, --yes   Do not ask for confirmation.`;
 

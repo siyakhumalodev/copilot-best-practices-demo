@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en-GB" dir="ltr" data-doc-id="github-copilot-best-practices-demo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>GitHub Copilot best practices and live demos</title>
+<meta name="description" content="A reusable guide to GitHub Copilot context, repository standards, code reviews, integrations, agent workflows and learning resources.">
+<meta name="author" content="Siya Khumalo, Senior Solution Engineer, Microsoft">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* =====================================================================
+   BRAND TOKENS - THE ONE PLACE TO RE-THEME PER CUSTOMER.
+   Change only these nine values (default: navy / amber / teal). Every
+   other colour derives from them. Keep text-on-background contrast at
+   WCAG AA or better; if --brand-accent changes, also check --accent-ink
+   and --accent-tint below, which are its readable text and tint shades.
+   ===================================================================== */
+:root {
+  --brand-primary: #0B2545;        /* deep navy */
+  --brand-primary-soft: #13315C;   /* lighter navy */
+  --brand-accent: #F2A900;         /* amber - key numbers and alerts, used sparingly */
+  --brand-good: #1F7A6D;           /* muted teal - "good / free / unlimited" states */
+  --brand-bg: #F7F5F0;             /* off-white */
+  --brand-surface: #FFFFFF;
+  --brand-ink: #1B2430;
+  --brand-muted: #5A6472;
+  --brand-border: #DAD5CB;
+
+  /* Semantic tokens (light theme) */
+  --bg: var(--brand-bg);
+  --surface: var(--brand-surface);
+  --surface-2: #EFEBE3;
+  --ink: var(--brand-ink);
+  --muted: var(--brand-muted);
+  --heading: var(--brand-primary);
+  --border: var(--brand-border);
+  --primary: var(--brand-primary);
+  --primary-soft: var(--brand-primary-soft);
+  --primary-tint: #E4EAF3;
+  --accent: var(--brand-accent);
+  --accent-ink: #6F4A00;           /* amber-derived text with AA contrast on light surfaces */
+  --accent-tint: #FCF0D2;
+  --good: var(--brand-good);
+  --good-ink: #155E53;
+  --good-tint: #DDEFEA;
+  --nav-bg: var(--brand-primary);
+  --nav-ink: #E8EEF6;
+  --nav-muted: #A9B8CF;
+  --nav-active: var(--brand-primary-soft);
+  --nav-line: rgba(255,255,255,.10);
+  --link: #0F4C81;
+  --focus: var(--brand-accent);
+  --btn-bg: var(--brand-primary);
+  --btn-ink: #FFFFFF;
+  --shadow: 0 1px 2px rgba(11,37,69,.05), 0 6px 20px rgba(11,37,69,.06);
+  --radius: 12px;
+  --nav-w: 300px;
+  --fs: 1rem;
+  --measure: 72ch;
+}
+
+/* Theme selection - LIGHT is the default regardless of the OS preference
+   (presented on a projector). The Theme button offers Dark, and an "Auto"
+   option that follows the OS preference for anyone who wants it. */
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1526; --surface: #13203A; --surface-2: #1A2A47;
+  --ink: #E7ECF4; --muted: #A7B3C6; --heading: #F3F6FA; --border: #2B3D5C;
+  --primary: #8FB3E3; --primary-soft: #6F95C9; --primary-tint: #1B2C4A;
+  --accent: #F2A900; --accent-ink: #FFC94D; --accent-tint: #3A2E10;
+  --good: #4FB39F; --good-ink: #8FD9C9; --good-tint: #123A34;
+  --nav-bg: #06101F; --nav-ink: #E7ECF4; --nav-muted: #93A3BC; --nav-active: #14264A;
+  --link: #8DB7EA; --btn-bg: #1E3A66; --btn-ink: #FFFFFF; --shadow: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    color-scheme: dark;
+    --bg: #0B1526; --surface: #13203A; --surface-2: #1A2A47;
+    --ink: #E7ECF4; --muted: #A7B3C6; --heading: #F3F6FA; --border: #2B3D5C;
+    --primary: #8FB3E3; --primary-soft: #6F95C9; --primary-tint: #1B2C4A;
+    --accent: #F2A900; --accent-ink: #FFC94D; --accent-tint: #3A2E10;
+    --good: #4FB39F; --good-ink: #8FD9C9; --good-tint: #123A34;
+    --nav-bg: #06101F; --nav-ink: #E7ECF4; --nav-muted: #93A3BC; --nav-active: #14264A;
+    --link: #8DB7EA; --btn-bg: #1E3A66; --btn-ink: #FFFFFF; --shadow: none;
+  }
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html.presenter { --fs: 1.17rem; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--fs); line-height: 1.55; -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { color: var(--heading); line-height: 1.2; margin: 0 0 .5em; font-weight: 650; letter-spacing: -.01em; }
+h3 { font-size: 1.15em; }
+h4 { font-size: 1em; }
+p, ul, ol, dl, table, figure { margin: 0 0 1em; }
+ul, ol { padding-inline-start: 1.3em; }
+li { margin-bottom: .3em; }
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+strong { font-weight: 650; }
+small, .small { font-size: .875em; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; inset-inline-start: 1rem; top: -200px; background: var(--surface); color: var(--ink); padding: .5rem 1rem; z-index: 200; border-radius: 8px; box-shadow: var(--shadow); }
+.skip:focus { top: 1rem; }
+.muted { color: var(--muted); }
+.section-h { margin-top: 1.4rem; }
+code { font-family: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace; font-size: .9em; background: var(--surface-2); padding: .05em .35em; border-radius: 4px; }
+.prose { max-width: var(--measure); }
+.nowrap { white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- Layout: main + right-hand navigation ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) var(--nav-w); grid-template-areas: "main nav"; min-height: 100vh; }
+main { grid-area: main; min-width: 0; }
+.sidenav {
+  grid-area: nav; position: sticky; top: 0; height: 100vh; overflow: auto;
+  background: var(--nav-bg); color: var(--nav-ink); display: flex; flex-direction: column;
+  border-inline-start: 1px solid var(--nav-line);
+}
+.nav-head { padding: 1.1rem 1.25rem .6rem; display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.wordmark { font-weight: 600; font-size: .92rem; letter-spacing: .01em; line-height: 1.25; }
+.wordmark small { display: block; color: var(--nav-muted); font-weight: 400; font-size: .74rem; margin-top: .15rem; }
+.nav-counter { color: var(--nav-muted); font-size: .8rem; white-space: nowrap; }
+.nav-toggle { display: none; align-items: center; gap: .45rem; background: transparent; color: var(--nav-ink); border: 1px solid var(--nav-line); border-radius: 8px; padding: .4rem .65rem; font: inherit; font-size: .85rem; cursor: pointer; }
+.nav-toggle .bars { display: inline-block; width: 16px; height: 2px; background: currentColor; box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor; }
+.progress { height: 4px; background: var(--nav-line); margin: 0 1.25rem .75rem; border-radius: 2px; overflow: hidden; }
+.progress > span { display: block; height: 100%; width: 9.0909%; background: var(--accent); transition: width .25s ease; }
+.navlist { list-style: none; margin: 0; padding: 0 .75rem; flex: 1; }
+.navlist li { margin: 0 0 .1rem; }
+.navlist a {
+  position: relative; display: grid; grid-template-columns: 1.5rem minmax(0, 1fr) auto; align-items: center; gap: .55rem;
+  color: var(--nav-ink); text-decoration: none; padding: .48rem .6rem .48rem .75rem; border-radius: 8px; font-size: .88rem; line-height: 1.3;
+}
+.navlist a:hover { background: rgba(255,255,255,.07); }
+.navlist a[aria-current="page"] { background: var(--nav-active); }
+.navlist a[aria-current="page"]::before { content: ""; position: absolute; inset-inline-start: 0; top: 20%; bottom: 20%; width: 3px; border-radius: 3px; background: var(--accent); }
+.navlist .n { color: var(--nav-muted); font-variant-numeric: tabular-nums; font-size: .78rem; }
+.navlist a[aria-current="page"] .n { color: var(--accent); font-weight: 700; }
+.badge { font-size: .68rem; font-weight: 600; padding: .12rem .45rem; border-radius: 999px; background: rgba(255,255,255,.12); color: var(--nav-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nav-tools { padding: .8rem 1.25rem .5rem; display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; border-top: 1px solid var(--nav-line); }
+.nav-tools button { background: rgba(255,255,255,.06); color: var(--nav-ink); border: 1px solid var(--nav-line); border-radius: 8px; padding: .45rem .5rem; font: inherit; font-size: .78rem; cursor: pointer; text-align: start; }
+.nav-tools button:hover { background: rgba(255,255,255,.12); }
+.nav-tools button[aria-pressed="true"] { background: var(--accent); color: #1B2430; border-color: var(--accent); font-weight: 600; }
+.nav-tools kbd { font-family: inherit; font-size: .7rem; border: 1px solid currentColor; border-radius: 4px; padding: 0 .3rem; margin-inline-start: .25rem; opacity: .85; }
+.nav-hint { padding: .25rem 1.25rem 1rem; color: var(--nav-muted); font-size: .74rem; margin: 0; }
+html:not(.js) .nav-tools, html:not(.js) .nav-hint, html:not(.js) .nav-counter { display: none; }
+
+/* ---------- Pages ---------- */
+.page { display: none; min-height: 100vh; flex-direction: column; }
+html.js .page.is-active { display: flex; }
+html:not(.js) .page:target { display: flex; }
+html:not(.js) main:not(:has(.page:target)) .page:first-of-type { display: flex; }
+.page-body { flex: 1; width: 100%; max-width: 1160px; margin: 0 auto; padding: clamp(1.5rem, 3.5vw, 3rem) clamp(1.25rem, 4vw, 3.5rem) 2rem; }
+.page-kicker { display: flex; align-items: center; gap: .7rem; margin-bottom: .6rem; color: var(--muted); font-size: .85rem; }
+.page-kicker .pn { font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: .75rem; }
+.time { display: inline-block; font-size: .72rem; font-weight: 700; padding: .12rem .5rem; border-radius: 999px; background: var(--accent-tint); color: var(--accent-ink); white-space: nowrap; }
+.time--ref { background: var(--surface-2); color: var(--muted); }
+.page-title { font-size: clamp(1.65rem, 2.6vw, 2.3rem); margin-bottom: .4rem; }
+.page-title:focus { outline: none; }
+.lead { font-size: 1.12em; color: var(--muted); max-width: var(--measure); margin-bottom: 1.6rem; }
+.page-foot { border-top: 1px solid var(--border); padding: .85rem clamp(1.25rem, 4vw, 3.5rem); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: .78rem; color: var(--muted); }
+.colophon { margin: 0; }
+.pager { display: flex; align-items: center; gap: .6rem; }
+.pager-pos { font-variant-numeric: tabular-nums; min-width: 3.5rem; text-align: center; }
+.btn { display: inline-flex; align-items: center; gap: .35rem; background: var(--btn-bg); color: var(--btn-ink); border: 1px solid transparent; border-radius: 8px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+.btn:hover { filter: brightness(1.12); }
+.btn--ghost { background: transparent; color: var(--heading); border-color: var(--border); }
+.btn--ghost:hover { background: var(--surface); filter: none; }
+.hint { color: var(--muted); font-size: .85em; }
+
+/* ---------- Cover ---------- */
+.page--cover .page-body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-content: center; }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .74rem; font-weight: 700; color: var(--accent-ink); margin-bottom: 1.2rem; }
+.cover-title { font-size: clamp(2.1rem, 4.2vw, 3.4rem); margin-bottom: .6rem; max-width: 18ch; }
+.cover-title .amp { color: var(--accent); }
+.subtitle { font-size: clamp(1.15rem, 1.8vw, 1.45rem); color: var(--muted); margin-bottom: 1.8rem; }
+.cover-meta { display: grid; gap: .8rem; margin: 0 0 1.8rem; }
+.cover-meta div { display: grid; grid-template-columns: 6.5rem 1fr; gap: .5rem; }
+.cover-meta dt { color: var(--muted); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; padding-top: .15em; }
+.cover-meta dd { margin: 0; }
+.agenda { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.35rem 1.5rem; box-shadow: var(--shadow); align-self: center; }
+.agenda h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .8rem; }
+.agenda ol { list-style: none; padding: 0; margin: 0; }
+.agenda li { display: grid; grid-template-columns: 1.6rem 1fr auto; gap: .5rem; align-items: baseline; padding: .38rem 0; border-bottom: 1px dashed var(--border); margin: 0; font-size: .95em; }
+.agenda li:last-child { border-bottom: 0; }
+.agenda li .n { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85em; }
+.agenda li a { color: var(--ink); text-decoration: none; }
+.agenda li a:hover { text-decoration: underline; }
+.agenda .mins { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85em; }
+.agenda-total { margin: .9rem 0 0; padding-top: .7rem; border-top: 1px solid var(--border); font-weight: 600; display: flex; justify-content: space-between; gap: 1rem; }
+.agenda-total .total-num { color: var(--accent-ink); }
+.wordmark-inline { font-weight: 700; color: var(--heading); }
+
+/* ---------- Cards, callouts, grids ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin-bottom: 1.4rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }
+.card h3 { font-size: 1.02em; margin-bottom: .45rem; }
+.card p:last-child, .card ul:last-child, .card dl:last-child { margin-bottom: 0; }
+.card .idx { display: inline-grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 999px; background: var(--primary-tint); color: var(--heading); font-weight: 700; font-size: .85rem; margin-bottom: .6rem; }
+.card--accent { border-top: 4px solid var(--accent); }
+.card--good { border-top: 4px solid var(--good); }
+.card--primary { border-top: 4px solid var(--primary); }
+.callout { border-inline-start: 4px solid var(--primary); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; padding: .9rem 1.2rem; margin: 0 0 1.2rem; box-shadow: var(--shadow); max-width: 100%; }
+.callout h3, .callout h4 { margin-bottom: .35rem; font-size: 1em; }
+.callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+.callout--accent { border-color: var(--accent); background: var(--accent-tint); }
+.callout--good { border-color: var(--good); background: var(--good-tint); }
+.callout--primary { background: var(--primary-tint); }
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; align-items: start; }
+.kpi { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--heading); line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.kpi--accent { color: var(--accent-ink); }
+.kpi--good { color: var(--good-ink); }
+.tag { display: inline-block; font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: .1rem .5rem; border-radius: 999px; vertical-align: middle; }
+.tag--on { background: var(--accent-tint); color: var(--accent-ink); }
+.tag--off { background: var(--good-tint); color: var(--good-ink); }
+.tag--neutral { background: var(--surface-2); color: var(--muted); }
+.tag--scheduled { background: var(--primary-tint); color: var(--heading); }
+.check-list { list-style: none; padding: 0; }
+.check-list li { position: relative; padding-inline-start: 1.6rem; margin-bottom: .5rem; }
+.check-list li::before { content: ""; position: absolute; inset-inline-start: 0; top: .5em; width: .8rem; height: .8rem; border-radius: 999px; background: var(--good); mask: none; }
+.check-list li::after { content: ""; position: absolute; inset-inline-start: .27rem; top: calc(.5em + .17rem); width: .25rem; height: .42rem; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.glossary-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .8rem 1.2rem; background: var(--surface-2); border-radius: var(--radius); padding: 1rem 1.2rem; margin: 0; }
+.glossary-strip div { font-size: .9em; }
+.glossary-strip dt { font-weight: 700; color: var(--heading); }
+.glossary-strip dd { margin: 0; color: var(--muted); }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; font-size: .93em; }
+th, td { text-align: start; padding: .6rem .8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--primary-tint); color: var(--heading); font-weight: 650; font-size: .85em; letter-spacing: .02em; }
+tbody tr:last-child td { border-bottom: 0; }
+td .num, th .num { font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; margin-bottom: 1.2rem; border-radius: var(--radius); }
+.table-wrap table { margin: 0; }
+.tbl-note { font-size: .8em; color: var(--muted); margin-top: .4rem; }
+.placeholder { color: var(--accent-ink); font-weight: 600; }
+
+/* ---------- Tier table ---------- */
+.tiers th.tier { vertical-align: middle; text-align: center; font-weight: 700; background: var(--surface-2); color: var(--heading); border-inline-start: 4px solid var(--border); }
+.tiers th.tier--good { border-inline-start-color: var(--good); }
+.tiers th.tier--primary { border-inline-start-color: var(--primary); }
+.tiers th.tier--accent { border-inline-start-color: var(--accent); }
+.tiers td.num, .tiers th.num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tiers td:last-child { color: var(--muted); font-size: .92em; }
+
+/* ---------- Equation strip (A + B = C) ---------- */
+.equation { display: flex; flex-wrap: wrap; align-items: stretch; gap: .6rem; margin-bottom: 1.4rem; }
+.eq-box { flex: 1 1 200px; background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--primary); border-radius: var(--radius); padding: .8rem 1rem; box-shadow: var(--shadow); }
+.eq-box strong { display: block; color: var(--heading); }
+.eq-box span { font-size: .85em; color: var(--muted); }
+.eq-box--good { border-top-color: var(--good); }
+.eq-box--accent { border-top-color: var(--accent); }
+.eq-op { align-self: center; font-weight: 700; color: var(--muted); font-size: .85em; padding: 0 .2rem; }
+
+/* ---------- Inline SVG figure (range / spread) ---------- */
+.pricefig { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem .6rem; margin: 1.2rem 0; }
+.pricefig figcaption { font-size: .85em; color: var(--muted); margin-bottom: .4rem; }
+.pricefig svg { width: 100%; height: auto; display: block; font-size: 13px; }
+.pricefig .axis { stroke: var(--border); stroke-width: 10; stroke-linecap: round; }
+.pricefig .seg-good { stroke: var(--good); stroke-width: 10; stroke-linecap: round; }
+.pricefig .seg-accent { stroke: var(--accent); stroke-width: 10; stroke-linecap: round; }
+.pricefig .dot { fill: var(--surface); stroke: var(--heading); stroke-width: 3; }
+.pricefig .lbl { fill: var(--ink); font-weight: 600; }
+.pricefig .sub { fill: var(--muted); font-size: 11px; }
+.pricefig .brace { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+
+/* ---------- Form panel + output tiles (optional interactive pages) ---------- */
+.calc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem 1.4rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+.calc h3 { margin-bottom: .2rem; }
+.calc .calc-intro { color: var(--muted); font-size: .9em; margin-bottom: 1rem; }
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-items: end; gap: .9rem 1.2rem; margin-bottom: 1.1rem; }
+.field label { display: block; font-size: .85em; font-weight: 600; color: var(--heading); margin-bottom: .3rem; }
+.field input[type="number"], .field select { width: 100%; font: inherit; padding: .5rem .65rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.field--check { display: flex; align-items: center; gap: .6rem; align-self: end; padding-bottom: .4rem; }
+.field--check input { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); margin: 0; }
+.field--check label { margin: 0; font-weight: 600; }
+.calc-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .8rem; }
+.out { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: .8rem .95rem; }
+.out--accent { background: var(--accent-tint); border-color: var(--accent); }
+.out-label { display: block; font-size: .8em; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.out output { display: block; font-size: 1.55rem; font-weight: 700; color: var(--heading); line-height: 1.2; margin: .2rem 0 .1rem; font-variant-numeric: tabular-nums; }
+.out--accent output { color: var(--accent-ink); }
+.out-sub { display: block; font-size: .78em; color: var(--muted); }
+
+/* ---------- Timeline ---------- */
+.timeline { list-style: none; padding: 0; margin: 0 0 1rem; position: relative; }
+.timeline::before { content: ""; position: absolute; inset-inline-start: 6.6rem; top: .4rem; bottom: .4rem; width: 2px; background: var(--border); }
+.timeline li { display: grid; grid-template-columns: 6rem 1.4rem minmax(0, 1fr); gap: .3rem .6rem; align-items: start; margin: 0 0 .7rem; }
+.timeline time, .timeline .when { font-weight: 700; color: var(--heading); font-size: .9em; text-align: end; padding-top: .1rem; font-variant-numeric: tabular-nums; }
+.timeline .dot { width: .85rem; height: .85rem; border-radius: 999px; background: var(--primary); border: 2px solid var(--bg); margin-top: .3rem; justify-self: center; box-shadow: 0 0 0 2px var(--primary); }
+.timeline li.is-scheduled .dot { background: var(--bg); box-shadow: 0 0 0 2px var(--accent); }
+.timeline li.is-now .dot { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.timeline li.is-now .when { color: var(--accent-ink); }
+.timeline .what { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .55rem .85rem; font-size: .95em; }
+.timeline li.is-now .what { background: var(--accent-tint); border-color: var(--accent); font-weight: 600; }
+.timeline .what .tag { margin-inline-start: .4rem; }
+
+/* ---------- Lever cards ---------- */
+.levers { display: grid; grid-template-columns: 1fr; gap: .9rem; margin-bottom: 1.2rem; }
+.lever { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 3fr); gap: 1.1rem; align-items: start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; box-shadow: var(--shadow); font-size: .93em; }
+.lever h3 { font-size: 1em; display: flex; gap: .55rem; align-items: baseline; margin: 0; padding-inline-end: 1rem; border-inline-end: 1px solid var(--border); }
+.lever h3 .idx { flex: none; display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--heading); color: var(--bg); font-size: .75rem; font-weight: 700; }
+.wdr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .2rem 1.1rem; margin: 0; }
+.wdr dt { grid-row: 1; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.wdr dd { grid-row: 2; }
+.wdr dt:nth-of-type(1), .wdr dd:nth-of-type(1) { grid-column: 1; }
+.wdr dt:nth-of-type(2), .wdr dd:nth-of-type(2) { grid-column: 2; }
+.wdr dt:nth-of-type(3), .wdr dd:nth-of-type(3) { grid-column: 3; }
+.wdr dd { margin: .1rem 0 0; }
+.wdr dd .tag { margin-inline-end: .35rem; }
+.visibility-cards { grid-template-columns: 1fr; gap: .9rem; }
+.visibility-cards .card { display: grid; grid-template-columns: minmax(220px, .85fr) minmax(0, 3fr); gap: 1.1rem; align-items: start; }
+.visibility-cards .card h3 { margin: 0; padding-inline-end: 1rem; border-inline-end: 1px solid var(--border); }
+.visibility-cards .card p { margin: 0; }
+@media (max-width: 760px) {
+  .lever { grid-template-columns: 1fr; gap: .7rem; }
+  .lever h3 { padding: 0 0 .65rem; border-inline-end: 0; border-bottom: 1px solid var(--border); }
+  .wdr { grid-template-columns: 1fr; gap: .1rem; }
+  .wdr dt, .wdr dd, .wdr dt:nth-of-type(n), .wdr dd:nth-of-type(n) { grid-column: 1; grid-row: auto; }
+  .wdr dt:not(:first-child) { margin-top: .6rem; }
+  .visibility-cards .card { grid-template-columns: 1fr; gap: .7rem; }
+  .visibility-cards .card h3 { padding: 0 0 .65rem; border-inline-end: 0; border-bottom: 1px solid var(--border); }
+}
+
+/* ---------- Nested layers diagram ---------- */
+.layers { margin-bottom: 1.4rem; }
+.layer { border: 2px solid var(--primary); border-radius: 14px; padding: .8rem .9rem .9rem; background: var(--primary-tint); }
+.layer > .layer-t { display: block; font-weight: 650; color: var(--heading); margin-bottom: .6rem; font-size: .95em; }
+.layer > .layer-t small { display: block; font-weight: 400; color: var(--muted); font-size: .85em; }
+.layer .layer { margin: 0; }
+.layer.l1 { border-color: var(--accent); background: var(--accent-tint); }
+.layer.l2 { background: var(--surface-2); border-color: var(--primary-soft); }
+.layer.l3 { background: var(--surface); }
+.layer.l4 { background: var(--good-tint); border-color: var(--good); }
+.layer.l4 > .layer-t { margin-bottom: 0; }
+.formula { font-size: clamp(1.1rem, 1.8vw, 1.45rem); font-weight: 700; color: var(--heading); margin: .2rem 0 .4rem; }
+.formula .eq { color: var(--accent-ink); }
+
+/* ---------- Qualitative relative bars ---------- */
+.bars { list-style: none; padding: 0; margin: 0 0 .5rem; display: grid; gap: .6rem; }
+.bars li { display: grid; grid-template-columns: minmax(150px, 34%) 1fr; gap: .8rem; align-items: center; font-size: .9em; }
+.bars .bar { height: 1.15rem; border-radius: 6px; background: var(--primary); position: relative; }
+.bars .bar--s { width: 5%; background: var(--good); }
+.bars .bar--m { width: 28%; background: var(--primary-soft); }
+.bars .bar--l { width: 100%; background: var(--accent); }
+.bars .bar::after { content: attr(data-label); position: absolute; inset-inline-start: calc(100% + .5rem); top: -.1rem; white-space: nowrap; font-size: .8em; color: var(--muted); }
+.bars .bar--l::after { inset-inline-start: auto; inset-inline-end: .5rem; color: #1B2430; top: .05rem; font-weight: 600; }
+
+/* ---------- Practices ---------- */
+.practices { counter-reset: practice; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: .8rem; list-style: none; padding: 0; margin: 0 0 1.4rem; }
+.practices li { counter-increment: practice; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .85rem 1rem .85rem 2.6rem; position: relative; font-size: .93em; margin: 0; }
+.practices li::before { content: counter(practice, lower-alpha); position: absolute; inset-inline-start: .85rem; top: .95rem; width: 1.3rem; height: 1.3rem; border-radius: 999px; background: var(--primary-tint); color: var(--heading); font-weight: 700; font-size: .75rem; display: grid; place-items: center; }
+.practices .why { color: var(--muted); }
+.practices li.is-good::before { background: var(--good-tint); color: var(--good-ink); }
+
+/* ---------- Evidence ---------- */
+.evidence { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+.evidence .card { display: flex; flex-direction: column; gap: .35rem; }
+.evidence .src { font-size: .8em; color: var(--muted); margin-top: auto; }
+
+/* ---------- Next steps columns ---------- */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.4rem; }
+.steps .card h3 { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+.steps .card h3 .tag { font-size: .65rem; }
+.steps ol { padding-inline-start: 1.2rem; margin: 0; }
+.steps li { margin-bottom: .45rem; }
+.closing { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.2rem; }
+.closing h3 { font-size: clamp(1.6rem, 3vw, 2.4rem); margin: 0; }
+.closing p { margin: 0; color: var(--muted); }
+
+/* ---------- Appendix ---------- */
+.glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: .6rem 1.4rem; margin-bottom: 1.4rem; }
+.glossary div { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .7rem .9rem; font-size: .92em; }
+.glossary dt { font-weight: 700; color: var(--heading); }
+.glossary dd { margin: .15rem 0 0; color: var(--muted); }
+.sources { font-size: .85em; padding-inline-start: 1.6em; columns: 1; }
+.sources li { margin-bottom: .35rem; overflow-wrap: anywhere; word-break: break-word; }
+.sources a { color: var(--link); }
+.appendix-note { font-size: .9em; color: var(--muted); border-top: 1px solid var(--border); padding-top: .8rem; }
+
+/* ---------- Speaker notes drawer (hidden by default; toggle with N) ---------- */
+.notes { display: none; }
+html.js.notes-open .page.is-active .notes {
+  display: block; position: fixed; inset-inline: 0 var(--nav-w); bottom: 0; max-height: 42vh; overflow: auto;
+  background: var(--nav-bg); color: var(--nav-ink); padding: .9rem clamp(1.25rem, 4vw, 3.5rem) 1.2rem;
+  border-top: 3px solid var(--accent); z-index: 50; box-shadow: 0 -8px 24px rgba(0,0,0,.22); font-size: .95rem;
+}
+html.js.notes-open .page.is-active { padding-bottom: 42vh; }
+.notes h3 { color: var(--accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; margin: 0 0 .5rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+.notes .timecheck { margin-inline-start: auto; font-weight: 600; color: var(--nav-ink); background: rgba(255,255,255,.1); padding: .15rem .6rem; border-radius: 999px; text-transform: none; letter-spacing: 0; font-size: .8rem; }
+.notes ul { margin: 0; padding-inline-start: 1.2rem; }
+.notes li { margin-bottom: .3rem; }
+.notes li:last-child { margin-bottom: 0; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 899.98px) {
+  .layout { grid-template-columns: 1fr; grid-template-areas: "nav" "main"; }
+  .sidenav { height: auto; max-height: 100vh; border-inline-start: 0; border-bottom: 1px solid var(--nav-line); z-index: 60; }
+  .nav-toggle { display: inline-flex; }
+  .nav-head { padding: .75rem 1rem .5rem; }
+  .progress { margin: 0 1rem .5rem; }
+  html.js .sidenav:not(.open) .navlist, html.js .sidenav:not(.open) .nav-tools, html.js .sidenav:not(.open) .nav-hint { display: none; }
+  .navlist { padding-bottom: .5rem; }
+  .page { min-height: 0; }
+  .page--cover .page-body { grid-template-columns: 1fr; }
+  .cover-meta div { grid-template-columns: 1fr; gap: .1rem; }
+  .timeline::before { display: none; }
+  .timeline li { grid-template-columns: 1fr; gap: .15rem; }
+  .timeline .dot { display: none; }
+  .timeline time, .timeline .when { text-align: start; }
+  .bars li { grid-template-columns: 1fr; gap: .25rem; }
+  .bars .bar::after { display: none; }
+  .bars .bar--l::after { display: block; }
+  html.js.notes-open .page.is-active .notes { inset-inline: 0; }
+}
+@media (max-width: 480px) {
+  .page-foot { flex-direction: column; align-items: flex-start; }
+}
+
+
+/* ---------- Wide-screen grid refinements ---------- */
+@media (min-width: 1100px) {
+  .cards--summary { grid-template-columns: repeat(6, 1fr); }
+  .cards--summary > .card { grid-column: span 2; }
+  .cards--summary > .card:nth-child(4), .cards--summary > .card:nth-child(5) { grid-column: span 3; }
+  .practices { grid-template-columns: repeat(4, 1fr); }
+  .calc-grid { grid-template-columns: 1fr 1.5fr 1.5fr 1.3fr; }
+}
+.evidence { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.practices li > strong { display: block; color: var(--heading); margin-bottom: .15rem; }
+.practices .why strong { display: inline; color: inherit; margin: 0; }
+.page { scroll-margin-top: 0; }
+@media (max-width: 899.98px) {
+  .page { scroll-margin-top: 5.5rem; }
+  html:not(.js) .sidenav { position: static; max-height: none; }
+}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Print: every page in sequence, nav and notes hidden ---------- */
+@media print {
+  :root { --bg: #fff; --surface: #fff; --surface-2: #f2f2f2; --ink: #000; --muted: #444; --heading: #0B2545; --border: #999; --shadow: none;
+          --accent-tint: #fff7e0; --good-tint: #eaf5f2; --primary-tint: #eef1f6; }
+  @page { size: A4; margin: 14mm; }
+  html, body { background: #fff; }
+  .layout { display: block; }
+  .sidenav, .notes, .pager, .skip, .hint, .nav-toggle { display: none !important; }
+  .page, html.js .page, html:not(.js) .page { display: flex !important; min-height: 0; break-after: page; page-break-after: always; padding-bottom: 0 !important; }
+  .page:last-of-type { break-after: auto; page-break-after: auto; }
+  .page-body { padding: 0 0 .8rem; max-width: none; }
+  .page--cover .page-body { display: block; }
+  .page-foot { padding: .4rem 0 0; }
+  .card, .callout, .lever, .out, .layer, .practices li, .timeline li, .glossary div, .eq-box { break-inside: avoid; page-break-inside: avoid; box-shadow: none; }
+  tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  a { color: #000; }
+  a[href^="http"]:not(.plainurl)::after { content: " (" attr(href) ")"; font-size: .85em; overflow-wrap: anywhere; }
+  .calc input, .calc select { border: 1px solid #999; background: #fff; color: #000; }
+  .nav-tools { display: none !important; }
+  .bars .bar--l::after { color: #000; }
+  /* Compact print scale so most pages fit one A4 sheet */
+  :root, html.presenter { --fs: 10.5pt; }
+  .page-title { font-size: 20pt; }
+  .cover-title { font-size: 26pt; }
+  .subtitle { font-size: 14pt; margin-bottom: 1rem; }
+  .lead { font-size: 1em; margin-bottom: 1rem; }
+  .page-kicker { margin-bottom: .3rem; }
+  .cover-meta { margin-bottom: 1rem; gap: .4rem; }
+  .agenda { padding: .8rem 1rem; margin-top: .8rem; }
+  .agenda li { padding: .2rem 0; }
+  .card, .lever, .callout, .out, .glossary div, .practices li, .timeline .what, .eq-box { padding: .6rem .8rem; }
+  .practices li { padding-inline-start: 2.4rem; }
+  .cards, .levers, .practices, .evidence, .steps, .two-col, .three-col, .glossary { gap: .6rem; margin-bottom: .9rem; }
+  .cards--summary { grid-template-columns: repeat(6, 1fr); }
+  .cards--summary > .card { grid-column: span 2; }
+  .cards--summary > .card:nth-child(4), .cards--summary > .card:nth-child(5) { grid-column: span 3; }
+  .levers { grid-template-columns: 1fr; }
+  .practices { grid-template-columns: repeat(2, 1fr); }
+  .evidence { grid-template-columns: repeat(4, 1fr); }
+  .kpi { font-size: 20pt; }
+  .timeline li { margin-bottom: .35rem; }
+  .timeline::before { inset-inline-start: 6.6rem; }
+  .glossary-strip { padding: .6rem .8rem; }
+  .calc { padding: .8rem 1rem; }
+  .pricefig { padding: .6rem .8rem .3rem; }
+  .page-foot { font-size: .7rem; padding-top: .3rem; }
+  .closing { padding-top: .6rem; }
+  .closing h3 { font-size: 18pt; }
+  .sources { font-size: .8em; }
+  .sources li { margin-bottom: .2rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="layout">
+
+<!-- =============================== NAVIGATION (right-hand panel) ===============================
+     The navlist below is REBUILT by the script from the <section class="page"> elements.
+     The static items only serve readers without JavaScript - keep them roughly in step. -->
+<nav class="sidenav" id="sidenav" aria-label="Pages">
+  <div class="nav-head">
+    <div class="wordmark">GitHub Copilot best practices<small>Practical guide and demos</small></div>
+    <span class="nav-counter" id="page-counter" aria-hidden="true">1 / 13</span>
+    <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="navlist"><span class="bars" aria-hidden="true"></span>Pages</button>
+  </div>
+  <div class="progress" id="progress" role="progressbar" aria-label="Progress through the document" aria-valuemin="1" aria-valuemax="13" aria-valuenow="1" aria-valuetext="Page 1 of 13"><span id="progress-fill"></span></div>
+  <ol class="navlist" id="navlist">
+    <li><a href="#p1" aria-current="page"><span class="n">1</span><span>Cover</span><span class="badge">0 min</span></a></li>
+    <li><a href="#p2"><span class="n">2</span><span>At a glance</span><span class="badge">2 min</span></a></li>
+    <li><a href="#p3"><span class="n">3</span><span>Getting context right</span><span class="badge">10 min</span></a></li>
+    <li><a href="#p4"><span class="n">4</span><span>Managing context and tokens</span><span class="badge">10 min</span></a></li>
+    <li><a href="#p5"><span class="n">5</span><span>Project standards</span><span class="badge">7 min</span></a></li>
+    <li><a href="#p6"><span class="n">6</span><span>Code and PR reviews</span><span class="badge">8 min</span></a></li>
+    <li><a href="#p7"><span class="n">7</span><span>Solutions and repositories</span><span class="badge">7 min</span></a></li>
+    <li><a href="#p8"><span class="n">8</span><span>Integrations</span><span class="badge">8 min</span></a></li>
+    <li><a href="#p9"><span class="n">9</span><span>What's new: Universe</span><span class="badge">8 min</span></a></li>
+    <li><a href="#p10"><span class="n">10</span><span>End-to-end with agents</span><span class="badge">12 min</span></a></li>
+    <li><a href="#p11"><span class="n">11</span><span>Learning and certifications</span><span class="badge">3 min</span></a></li>
+    <li><a href="#p12"><span class="n">12</span><span>Next steps and Q&amp;A</span><span class="badge">15 min</span></a></li>
+    <li><a href="#p13"><span class="n">13</span><span>Appendix</span><span class="badge">ref</span></a></li>
+  </ol>
+  <div class="nav-tools">
+    <button type="button" id="btn-presenter" aria-pressed="false">Presenter<kbd>P</kbd></button>
+    <button type="button" id="btn-theme" aria-label="Theme: Light. Press to change">Theme: Light</button>
+    <button type="button" id="btn-notes" aria-pressed="false">Notes<kbd>N</kbd></button>
+    <button type="button" id="btn-print">Print</button>
+  </div>
+  <p class="nav-hint">← → or PageUp/PageDown to move · Home/End to jump · N notes · P presenter</p>
+</nav>
+
+<main id="main" class="deck">
+
+<!-- ============ PAGE 1 · COVER ============ -->
+<section class="page page--cover is-active" id="p1" aria-labelledby="p1-title" data-title="Cover" data-minutes="0">
+  <div class="page-body">
+    <div>
+      <p class="eyebrow">Copilot users community session</p>
+      <h1 class="cover-title page-title" id="p1-title" tabindex="-1">GitHub Copilot best practices <span class="amp">&amp;</span> live demos</h1>
+      <p class="subtitle">Getting more value from GitHub Copilot - for software engineers and technical leads</p>
+      <dl class="cover-meta">
+        <div><dt>Prepared by</dt><dd>Siya Khumalo, Senior Solution Engineer, Microsoft</dd></div>
+        <div><dt>Format</dt><dd>A suggested 90-minute session with demonstrations, discussion and Q&amp;A. Use this guide as a reference.</dd></div>
+        <div><dt>Demo</dt><dd>ClaimsDesk - a fictional insurance claims app (.NET 10 API and React) with synthetic data</dd></div>
+      </dl>
+      <p class="hint">Use ← → to navigate</p>
+    </div>
+    <aside class="agenda" aria-labelledby="agenda-title">
+      <h2 id="agenda-title">Agenda</h2>
+      <ol id="agenda-list"></ol>
+      <p class="agenda-total"><span>Presented content</span><span class="total-num" id="agenda-total">≈ 90 min</span></p>
+    </aside>
+    <aside class="notes" aria-label="Speaker notes for page 1">
+      <h3>Speaker notes <span class="timecheck">Time check: 0 min - start</span></h3>
+      <ul>
+        <li>Welcome attendees and set the goal: practical, demo-led ways to get more value from Copilot.</li>
+        <li>Practical and demo-led: everything runs live in one repository attendees get afterwards.</li>
+        <li>Three threads: context, standards, scale - then Universe news, an end-to-end agent scenario and learning paths.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 2 ============ -->
+<section class="page" id="p2" aria-labelledby="p2-title" data-title="At a glance" data-agenda-title="Welcome and objectives" data-minutes="2">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 2 of 13</span><span class="time">2 min</span></p>
+    <h2 class="page-title" id="p2-title" tabindex="-1">At a glance</h2>
+    <p class="lead">Three ideas run through the session: give Copilot the right context, let the repository carry your standards, and scale with agents and integrations you control.</p>
+    <div class="cards cards--summary">
+      <article class="card card--primary"><span class="idx" aria-hidden="true">1</span><h3>The right context, not all the context</h3><p>Answer quality and AI-credit spend both depend on what is in the context window. <strong>One task per session</strong>, point at the right files, enable only the tools you need.</p></article>
+      <article class="card card--primary"><span class="idx" aria-hidden="true">2</span><h3>Let the repository carry the rules</h3><p>Instructions, path instructions, skills and custom agents in <code>.github/</code> make short requests better - and <strong>shape code review too</strong>.</p></article>
+      <article class="card card--accent"><span class="idx" aria-hidden="true">3</span><h3>A green build is not a good change</h3><p>Copilot reviews in VS Code, Copilot CLI, GitHub pull requests and <strong>Azure Repos pull requests (generally available)</strong>. People still approve.</p></article>
+      <article class="card card--accent"><span class="idx" aria-hidden="true">4</span><h3>Scale across solutions, repositories and tools</h3><p>Multi-root workspaces, extra directories in Copilot CLI, Copilot projects - and MCP for Azure DevOps, Jira and the browser, <strong>governed centrally</strong>.</p></article>
+      <article class="card card--good"><span class="idx" aria-hidden="true">5</span><h3>Agents with a human gate</h3><p>An orchestrator delivers a story through specialist sub-agents. <strong>Humans approve before code is written and before merge</strong>; CI stays deterministic.</p></article>
+    </div>
+    <div class="callout callout--good prose">
+      <h3>Everything shown is yours to reuse</h3>
+      <p>The <a href="https://github.com/siyakhumalodev/copilot-best-practices-demo">ClaimsDesk demo is a public GitHub template</a>. Select <strong>Use this template &rarr; Create a new repository</strong> to make your own copy. The demo uses synthetic data and simplified rules on a .NET API and React stack.</p>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 2">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Welcome and objectives segment (2 minutes).</li>
+        <li>Point at takeaway 1 - show how context choices affect answer quality and AI-credit usage.</li>
+        <li>Questions in the chat as we go; 15 minutes of Q&amp;A at the end.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 3 ============ -->
+<section class="page" id="p3" aria-labelledby="p3-title" data-title="Getting context right" data-agenda-title="Getting context right - what fills the window" data-minutes="10">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 3 of 13</span><span class="time">10 min</span></p>
+    <h2 class="page-title" id="p3-title" tabindex="-1">Getting context right</h2>
+    <p class="lead">Copilot can only use what is in its context window - so make it the right material, not everything.</p>
+    <dl class="glossary-strip">
+      <div><dt>Context window</dt><dd>Everything the model sees for one request - instructions, tool definitions, history, files, tool results - and the answer must fit too.</dd></div>
+      <div><dt>Compaction</dt><dd>Near the limit, older turns are summarised automatically. Detail is lost, so start fresh before you get there.</dd></div>
+      <div><dt>AI Credits</dt><dd>Since 1 June 2026 Copilot usage is billed in GitHub AI Credits based on tokens (1 credit = $0.01). Code completions are not billed.</dd></div>
+    </dl>
+    <h3 class="section-h">What fills the window - and how you control it</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Sources of context, when they are added and how to control them</caption>
+        <thead><tr><th scope="col">Source</th><th scope="col">When it is added</th><th scope="col">How you control it</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Repository instructions</strong></td><td>Every request</td><td>Keep them short: a map, commands, conventions, guardrails</td></tr>
+          <tr><td><strong>Path instructions and skills</strong></td><td>When matching files are involved; skill bodies only when relevant</td><td>Scope with <code>applyTo</code>; precise skill descriptions</td></tr>
+          <tr><td><strong>Tool definitions</strong> (including every MCP tool)</td><td>Every request, for every enabled tool</td><td>Tools picker; start only the MCP servers you need; narrow agent tool lists</td></tr>
+          <tr><td><strong>Conversation history</strong></td><td>Re-sent on every turn</td><td>One task per session; compact; hand over and start fresh</td></tr>
+          <tr><td><strong>Files, selections, search results</strong></td><td>When you attach them or the agent reads them</td><td>Point at the few files that matter</td></tr>
+          <tr><td><strong>Tool results</strong> (file reads, terminal output)</td><td>As the agent works</td><td>Quiet commands and test filters</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="section-h">The demo: the same model, different context</h3>
+    <div class="two-col">
+      <div class="card card--accent"><h3>Insufficient - one-line prompt, no repository context</h3><ul>
+        <li>Calculation dropped into the endpoint or mapping</li>
+        <li>Misses the extra £250.00 escape-of-water excess</li>
+        <li>No £0.00 floor; sometimes <code>double</code> for money</li>
+        <li>Few or no tests - the example claim comes out at £1,600.00</li></ul></div>
+      <div class="card card--good"><h3>Sufficient - story, rulebook skill, instructions, definition of done</h3><ul>
+        <li>Rule in the domain layer, exposed on the claim detail</li>
+        <li>Escape-of-water excess and the £0.00 floor applied</li>
+        <li><code>decimal</code> money, unit and API tests for the boundaries</li>
+        <li>The example claim comes out right at £1,350.00</li></ul></div>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 3">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Show the context window control in the chat input (hover for the breakdown).</li>
+        <li>Run the A/B demo on a sample story: context off with a one-line prompt, then context on with a specific prompt.</li>
+        <li>Score it: £1,600.00 vs £1,350.00 - same model, different context.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 4 ============ -->
+<section class="page" id="p4" aria-labelledby="p4-title" data-title="Managing context and tokens" data-agenda-title="Managing context and tokens" data-minutes="10">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 4 of 13</span><span class="time">10 min</span></p>
+    <h2 class="page-title" id="p4-title" tabindex="-1">Managing context and tokens</h2>
+    <p class="lead">The habits that improve answers are the same ones that reduce AI-credit spend.</p>
+    <ol class="practices">
+      <li class="is-good"><strong>One task, one session</strong><span class="why">New chat (or <code>/clear</code>) when the task changes. <em>Why:</em> every turn re-sends the history.</span></li>
+      <li><strong>Say what "done" looks like</strong><span class="why">Goal, files, rules, constraints, tests to add, the command to run.</span></li>
+      <li><strong>Point, don't paste</strong><span class="why"><code>#file</code>, <code>#selection</code>, <code>#changes</code>; <code>#codebase</code> only to discover.</span></li>
+      <li><strong>Let the repository carry the rules</strong><span class="why">Conventions in instructions, know-how in skills - not re-typed in every prompt.</span></li>
+      <li class="is-good"><strong>Keep instructions lean</strong><span class="why">Every line of the repository instructions is sent with every request.</span></li>
+      <li class="is-good"><strong>Fewer tools</strong><span class="why">Each enabled MCP tool adds its definition to every request; VS Code allows at most 128 tools per request.</span></li>
+      <li class="is-good"><strong>Quiet, targeted commands</strong><span class="why">Filtered test runs and quiet output - terminal output lands in the window.</span></li>
+      <li><strong>Plan, then implement fresh</strong><span class="why">Plan agent or <code>/plan</code> for big changes; implement in a new session from the plan.</span></li>
+      <li><strong>Compact or hand over</strong><span class="why"><code>/compact</code> to summarise; a short handover note to restart small.</span></li>
+      <li class="is-good"><strong>Match effort to the task</strong><span class="why">Lighter models or lower effort for routine edits; deeper reasoning for design and debugging.</span></li>
+    </ol>
+    <h3 class="section-h">Controls you saw</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Context controls in Copilot CLI and VS Code</caption>
+        <thead><tr><th scope="col">Copilot CLI</th><th scope="col">VS Code</th><th scope="col">Use it to</th></tr></thead>
+        <tbody>
+          <tr><td><code>/context</code></td><td>Context window control in the chat input</td><td>See token use by category</td></tr>
+          <tr><td><code>/compact</code> (automatic at about 80%)</td><td><code>/compact</code>; automatic summarisation near the limit</td><td>Summarise a long session</td></tr>
+          <tr><td><code>/clear</code> or <code>/new</code></td><td>New chat</td><td>Start fresh for a new task</td></tr>
+          <tr><td><code>/usage</code></td><td>Hover the context control for AI Credits used</td><td>See what a session cost</td></tr>
+          <tr><td><code>/model</code></td><td>Model picker</td><td>Choose model or effort</td></tr>
+          <tr><td><code>/add-dir</code>, <code>--add-dir</code></td><td>Multi-root workspace</td><td>Work across folders and repositories</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="formula">Sufficient prompt <span class="eq">=</span> goal <span class="eq">+</span> files <span class="eq">+</span> rules <span class="eq">+</span> constraints <span class="eq">+</span> proof <span class="eq">+</span> done</p>
+    <aside class="notes" aria-label="Speaker notes for page 4">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Demo in Copilot CLI: /context, ask a question, /context again, /compact, /usage, /model.</li>
+        <li>Teal items are the biggest token savers.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 5 ============ -->
+<section class="page" id="p5" aria-labelledby="p5-title" data-title="Project standards" data-agenda-title="Standards - customising Copilot" data-minutes="7">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 5 of 13</span><span class="time">7 min</span></p>
+    <h2 class="page-title" id="p5-title" tabindex="-1">Project-specific standards</h2>
+    <p class="lead">Put conventions where Copilot always finds them - and keep them short.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">The Copilot customisation stack</caption>
+        <thead><tr><th scope="col">Layer</th><th scope="col">Where</th><th scope="col">Loaded</th><th scope="col">Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Deterministic checks</strong></td><td><code>.editorconfig</code>, analysers, linters, CI</td><td>Always enforced</td><td>What must never slip</td></tr>
+          <tr><td><strong>Repository instructions</strong></td><td><code>.github/copilot-instructions.md</code></td><td>Every request</td><td>Map, commands, conventions, guardrails, review priorities</td></tr>
+          <tr><td><strong>Path instructions</strong></td><td><code>.github/instructions/*.instructions.md</code> with <code>applyTo</code></td><td>When matching files are involved</td><td>Language or area conventions (C#, tests, React)</td></tr>
+          <tr><td><strong>Skills</strong></td><td><code>.github/skills/&lt;name&gt;/SKILL.md</code></td><td>On demand; reusable task skills can be invoked by name in Copilot Chat</td><td>Rulebooks, procedures, templates and repeatable tasks</td></tr>
+          <tr><td><strong>Custom agents</strong></td><td><code>.github/agents/*.agent.md</code></td><td>When selected or called as sub-agents</td><td>Roles with limited tools, handoffs, orchestration</td></tr>
+          <tr><td><strong>Organisation and enterprise</strong></td><td>Organisation instructions, shared agents, managed settings</td><td>Across repositories</td><td>The paved road for every team</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two-col">
+      <div class="card"><h3>Writing instructions that work</h3><ul class="check-list">
+        <li>Short and specific - a map, not a manual</li>
+        <li>Commands that keep output small</li>
+        <li>"Always / never" rules with the reason</li>
+        <li>What reviewers should prioritise</li>
+        <li>Long procedures moved into skills</li></ul></div>
+      <div class="card card--good"><h3>A paved road for your .NET/API and React stack</h3><ul>
+        <li>Make a <code>.github/</code> folder like the demo's a template for new services</li>
+        <li>Keep organisation-wide rules in organisation custom instructions; share agents organisation-wide</li>
+        <li>Govern models, MCP servers and the cloud agent centrally with policies and managed settings</li>
+        <li>Review and version these files like code - they are code</li></ul></div>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 5">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Walk the .github/ tree layer by layer.</li>
+        <li>Live: invoke the <code>add-endpoint</code> skill (for example, <code>/add-endpoint</code>) for a "withdraw claim" endpoint. Show References if the chat UI provides them.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 6 ============ -->
+<section class="page" id="p6" aria-labelledby="p6-title" data-title="Code and PR reviews" data-agenda-title="Reviews - code and pull requests" data-minutes="8">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 6 of 13</span><span class="time">8 min</span></p>
+    <h2 class="page-title" id="p6-title" tabindex="-1">Code and pull request reviews</h2>
+    <p class="lead">Use Copilot to review early and often - wherever your code lives - and keep a person as the approver.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Where Copilot code review runs</caption>
+        <thead><tr><th scope="col">Where</th><th scope="col">How</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>VS Code - uncommitted changes</strong></td><td>Source Control view, <strong>Code Review</strong></td><td>Custom guidance via a setting (the demo points it at its code-review skill)</td></tr>
+          <tr><td><strong>VS Code - a branch</strong></td><td>A read-only Code Reviewer custom agent</td><td>Severity table against the house rules</td></tr>
+          <tr><td><strong>Copilot CLI</strong></td><td><code>/review</code> (and <code>/security-review</code>)</td><td>Works with any Git host</td></tr>
+          <tr><td><strong>GitHub pull request</strong></td><td>Add <strong>Copilot</strong> as a reviewer, or a branch ruleset for automatic reviews</td><td>Effort Lite, Balanced (default) or Max; reads repository instructions from the pull request branch</td></tr>
+          <tr><td><strong>Azure Repos pull request</strong> <span class="tag tag--on">GA</span></td><td>Request <strong>GitHub Copilot</strong> in Reviewers, or a branch policy for automatic reviews</td><td>Inline comments and suggested changes; a human still owns approval</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two-col">
+      <div class="card card--primary"><h3>What the demo review caught</h3><ul>
+        <li>Hard-coded excess and <code>double</code> for money</li>
+        <li>Settling a claim that was never approved</li>
+        <li>Claimant email written to the logs</li>
+        <li>Exception text returned to callers</li>
+        <li>Blocking calls, the system clock, no cancellation, no tests</li></ul>
+        <p class="small muted">The change built and passed CI - every one of these would have shipped.</p></div>
+      <div class="callout callout--accent prose"><h3>Azure Repos - generally available</h3><ul>
+        <li>Administrators enable Copilot code review at the organisation, project and repository levels</li>
+        <li>Request a review from the pull request's Reviewers list, or add a branch policy to request reviews automatically</li>
+        <li>Set a default Lite or Balanced effort for a project or repository; choose another effort for an individual review</li>
+        <li>Use custom instructions and agent skills to align reviews with team standards; apply suggestions and resolve comments in the pull request</li>
+        <li>Usage is billed in GitHub AI Credits to the Azure subscription linked to the Azure DevOps organisation</li>
+        <li>Audit log events record when the feature is enabled or disabled and when its settings change</li></ul></div>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 6">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Planted change on branch demo/settle-claim: green build, a dozen problems.</li>
+        <li>Show VS Code review, then the pre-run pull request review; Azure Repos code review is generally available.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 7 ============ -->
+<section class="page" id="p7" aria-labelledby="p7-title" data-title="Solutions and repositories" data-agenda-title="Scale - solutions and repositories" data-minutes="7">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 7 of 13</span><span class="time">7 min</span></p>
+    <h2 class="page-title" id="p7-title" tabindex="-1">Larger solutions and multiple repositories</h2>
+    <p class="lead">Give Copilot a map, then focus it - across one solution or several repositories.</p>
+    <div class="cards">
+      <article class="card card--primary"><h3>A map, not a manual</h3><p>A short layout table in the repository instructions tells Copilot where things live.</p></article>
+      <article class="card card--primary"><h3>Area rules where they apply</h3><p>Path instructions per language or folder; nested <code>AGENTS.md</code> files for large monorepos.</p></article>
+      <article class="card card--primary"><h3>Find, then focus</h3><p><code>#codebase</code> to discover, then attach the few files that matter; exclude noise from search.</p></article>
+      <article class="card card--good"><h3>Split the work</h3><p>Sub-agents each work in their own context window and return a short summary.</p></article>
+    </div>
+    <h3 class="section-h">Frontend and backend in separate repositories</h3>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Options for working across repositories</caption>
+        <thead><tr><th scope="col">Option</th><th scope="col">How</th><th scope="col">Good for</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Multi-root workspace</strong></td><td>Open both repositories in one VS Code workspace</td><td>One session reading and changing both; each keeps its own instructions</td></tr>
+          <tr><td><strong>Copilot CLI</strong></td><td><code>copilot --add-dir ../other-repo</code> or <code>/add-dir</code></td><td>Terminal-first work across folders</td></tr>
+          <tr><td><strong>Copilot projects</strong> <span class="tag tag--scheduled">preview</span></td><td>GitHub Copilot app: give Copilot a goal across repositories</td><td>Parallel, managed agent sessions</td></tr>
+          <tr><td><strong>Copilot cloud agent</strong></td><td>Cloud-sandbox sessions can span repositories in one organisation</td><td>Delegated work that comes back as pull requests</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout--primary prose"><h3>Contract first</h3><p>Agree field names and types before either side changes, make both changes in one session or coordinated tasks, and keep a contract test on each side.</p></div>
+    <aside class="notes" aria-label="Speaker notes for page 7">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Live: map a behaviour through the solution; then one change across the API and web repositories in a multi-root workspace.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 8 ============ -->
+<section class="page" id="p8" aria-labelledby="p8-title" data-title="Integrations" data-agenda-title="Scale - integrations and connected workflows" data-minutes="8">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 8 of 13</span><span class="time">8 min</span></p>
+    <h2 class="page-title" id="p8-title" tabindex="-1">Integrations and connected workflows</h2>
+    <p class="lead">Connect Copilot to the tools you already use - and decide centrally which ones.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Ways Copilot connects to other tools</caption>
+        <thead><tr><th scope="col">Tool</th><th scope="col">How Copilot connects</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Azure DevOps</strong></td><td>Remote MCP server <code>https://mcp.dev.azure.com/&lt;organisation&gt;</code>, or the local <code>@azure-devops/mcp</code> server</td><td>Remote server generally available for Microsoft Entra-backed organisations: work items, repositories, pipelines and more</td></tr>
+          <tr><td><strong>Jira and Confluence</strong></td><td>Atlassian remote MCP server <code>https://mcp.atlassian.com/v2/mcp</code></td><td>OAuth sign-in; works with VS Code and GitHub Copilot</td></tr>
+          <tr><td><strong>GitHub</strong></td><td>GitHub MCP server <code>https://api.githubcopilot.com/mcp/</code></td><td>Built into Copilot CLI and the cloud agent; read-only and toolset options</td></tr>
+          <tr><td><strong>Browser</strong></td><td>Playwright MCP server (<code>npx @playwright/mcp@latest</code>)</td><td>Let Copilot check a journey in the running app</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two-col">
+      <div class="card card--primary"><h3>Beyond the IDE</h3><ul>
+        <li><strong>GitHub Copilot for Jira</strong> (generally available): assign a Jira issue to the Copilot cloud agent, get a draft pull request - needs Jira Cloud and code in GitHub</li>
+        <li><strong>Azure Boards</strong> (generally available): "Create a pull request with GitHub Copilot" from a work item - needs GitHub repositories connected through the GitHub app</li>
+        <li><strong>Copilot code review in Azure Repos</strong> (generally available): see page 6</li></ul></div>
+      <div class="card card--accent"><h3>Governance checklist</h3><ul class="check-list">
+        <li>Enterprise policy "MCP servers in Copilot" decides whether MCP runs at all</li>
+        <li>Allow-list approved servers in enterprise managed settings</li>
+        <li>Prefer read-only modes and limited toolsets</li>
+        <li>Least-privilege tool lists in custom agents; writes behind a confirmation</li>
+        <li>No secrets in MCP configuration files</li>
+        <li>Proxy and TLS inspection allow only the approved remote endpoints</li></ul></div>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 8">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Show .vscode/mcp.json (VS Code) and .mcp.json (Copilot CLI and other harnesses).</li>
+        <li>Live: import or read a work item in Azure DevOps; check a journey in the browser.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 9 ============ -->
+<section class="page" id="p9" aria-labelledby="p9-title" data-title="What's new: Universe" data-agenda-title="What's new - GitHub Universe highlights" data-minutes="8">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 9 of 13</span><span class="time">8 min</span></p>
+    <h2 class="page-title" id="p9-title" tabindex="-1">What's new from GitHub Universe 2026</h2>
+    <p class="lead">Announced on 28-29 October 2026 - and how each maps to today's themes.</p>
+    <div class="cards">
+      <article class="card card--primary"><h3>Copilot Fusion <span class="tag tag--off">GA</span></h3><p><strong>Context and cost.</strong> Choose an effort level (Standard, High, Max); the runtime orchestrates models, only those your policies allow, drawing on AI Credits.</p></article>
+      <article class="card card--primary"><h3>Copilot code review Max <span class="tag tag--scheduled">preview</span></h3><p><strong>Reviews.</strong> A deeper review when a change needs it; Lite and Balanced keep everyday reviews fast.</p></article>
+      <article class="card card--primary"><h3>GitHub Copilot app and Copilot projects</h3><p><strong>Scale.</strong> The app (GA) delegates and tracks agent work in one place; projects (preview) run agent work across several repositories in parallel. Sessions continue across the app, VS Code, CLI and web.</p></article>
+      <article class="card card--primary"><h3>Copilot automations <span class="tag tag--off">GA</span></h3><p><strong>Automation.</strong> Recurring work such as triage and code review, with triggers, cost limits and revision history - and they learn from outcomes.</p></article>
+      <article class="card card--good"><h3>Security fixes as tasks</h3><p><strong>Security.</strong> Agentic autofix for code scanning alerts (GA; up to 25 alerts in one pull request) and AI Scan for repositories (public preview) for existing code.</p></article>
+      <article class="card card--accent"><h3>GitHub Enterprise includes Copilot</h3><p><strong>Commercials.</strong> Copilot features without a separate subscription, paying for the AI Credits used; existing customers can stay on their plans or move. Talk to your GitHub account team.</p></article>
+    </div>
+    <div class="callout callout--primary prose"><h3>The full picture</h3><p>Both are public: the GitHub Universe recap at <code>github.com/events/universe/recap</code> and the Universe 2026 keynote round-up on the GitHub blog. Links are in the appendix.</p></div>
+    <aside class="notes" aria-label="Speaker notes for page 9">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Connect these updates to the broader product roadmap.</li>
+        <li>For commercial questions, direct attendees to their GitHub account team.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 10 ============ -->
+<section class="page" id="p10" aria-labelledby="p10-title" data-title="End-to-end with agents" data-agenda-title="End-to-end development scenario" data-minutes="12">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 10 of 13</span><span class="time">12 min</span></p>
+    <h2 class="page-title" id="p10-title" tabindex="-1">End-to-end with agents</h2>
+    <p class="lead">One story, five specialist agents, two human decisions.</p>
+    <ol class="timeline">
+      <li><span class="when">Story</span><span class="dot" aria-hidden="true"></span><div class="what">Read from Azure DevOps, Jira, a GitHub issue or a local file - "Fast-track low-value claims"</div></li>
+      <li><span class="when">Analyse</span><span class="dot" aria-hidden="true"></span><div class="what">Story Analyst checks the acceptance criteria against the rulebook and finds five gaps</div></li>
+      <li class="is-now"><span class="when">Human gate</span><span class="dot" aria-hidden="true"></span><div class="what">A person approves the criteria before any code or test is written <span class="tag tag--on">decision</span></div></li>
+      <li><span class="when">Build</span><span class="dot" aria-hidden="true"></span><div class="what">API Developer and Web Developer sub-agents work in parallel, each in its own context with only its tools</div></li>
+      <li><span class="when">Verify</span><span class="dot" aria-hidden="true"></span><div class="what">Test Engineer runs every suite, fills gaps, writes a traceability report</div></li>
+      <li><span class="when">Review</span><span class="dot" aria-hidden="true"></span><div class="what">Code Reviewer agent, then Copilot code review on the pull request</div></li>
+      <li class="is-now"><span class="when">Merge</span><span class="dot" aria-hidden="true"></span><div class="what">A person merges; CI runs deterministic checks only <span class="tag tag--on">decision</span></div></li>
+    </ol>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">The agent team in the demo repository</caption>
+        <thead><tr><th scope="col">Agent</th><th scope="col">Tools</th><th scope="col">Role</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Feature Orchestrator</strong></td><td>Delegate, read, search, write reports, work items</td><td>Runs the flow and the gate; never writes code</td></tr>
+          <tr><td><strong>Story Analyst</strong></td><td>Read and search only</td><td>Acceptance-criteria quality, gap table, plan, questions</td></tr>
+          <tr><td><strong>API Developer</strong> / <strong>Web Developer</strong></td><td>Read, edit, run tests - each in its own area</td><td>Implement against one agreed contract</td></tr>
+          <tr><td><strong>Test Engineer</strong></td><td>Run tests, edit tests only, browser</td><td>Proves every criterion is covered</td></tr>
+          <tr><td><strong>Code Reviewer</strong></td><td>Read-only</td><td>Severity-ranked review against the house rules</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout--good prose"><h3>AI carries the rules, humans keep the judgement</h3><p>One gate before code, tests and code written by different agents, a review before merge, and no AI in the CI critical path. The same story can also be handed to the Copilot cloud agent and come back as a pull request.</p></div>
+    <aside class="notes" aria-label="Speaker notes for page 10">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Live: invoke the <code>deliver-story</code> skill with the sample story, approve at the gate, and watch the parallel build.</li>
+        <li>Checkpoint: build stage started by minute 6, otherwise use the prepared outputs.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 11 ============ -->
+<section class="page" id="p11" aria-labelledby="p11-title" data-title="Learning and certifications" data-agenda-title="Learning resources and certifications" data-minutes="3">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 11 of 13</span><span class="time">3 min</span></p>
+    <h2 class="page-title" id="p11-title" tabindex="-1">Learning resources and certifications</h2>
+    <p class="lead">Where to go next - from first steps to agentic AI certifications.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Learning resources and certifications</caption>
+        <thead><tr><th scope="col">Resource</th><th scope="col">What it covers</th><th scope="col">Where</th></tr></thead>
+        <tbody>
+          <tr><td><strong>GitHub certifications</strong></td><td>GitHub Copilot (GH-300 - now including the CLI, sub-agents and MCP), Foundations (GH-900), Actions (GH-200), Advanced Security (GH-500), Administration (GH-100); new agentic AI certifications GH-600 (developer) and GH-700 (business professional, beta)</td><td><code>learn.github.com/certifications</code></td></tr>
+          <tr><td><strong>GitHub Skills</strong></td><td>Hands-on courses: getting started, customising Copilot, code review, MCP, cloud agent, Copilot CLI, agent orchestration - plus migrating an Azure DevOps repository</td><td><code>learn.github.com/skills</code></td></tr>
+          <tr><td><strong>Microsoft Learn paths</strong></td><td>GitHub Copilot Fundamentals, part 1 and part 2</td><td>Microsoft Learn (links in the appendix)</td></tr>
+          <tr><td><strong>Microsoft Applied Skills</strong></td><td>"Accelerate AI-assisted development by using GitHub Copilot" - a practical assessment</td><td>Microsoft Learn credentials</td></tr>
+          <tr><td><strong>Microsoft AI certifications</strong></td><td>Azure AI Fundamentals (exam AI-901); Azure AI Apps and Agents Developer Associate (AI-103, replacing AI-102)</td><td>Microsoft Learn credentials</td></tr>
+          <tr><td><strong>Product documentation</strong></td><td>VS Code agent customisation, Copilot CLI reference, Copilot code review</td><td>Links in the appendix</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 11">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>All links are in the appendix.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 12 ============ -->
+<section class="page" id="p12" aria-labelledby="p12-title" data-title="Next steps and Q&amp;A" data-agenda-title="Q&amp;A and next steps" data-minutes="15">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 12 of 13</span><span class="time">15 min</span></p>
+    <h2 class="page-title" id="p12-title" tabindex="-1">Next steps and Q&amp;A</h2>
+    <p class="lead">Turn today into habits this week, then into a paved road for every team.</p>
+    <div class="steps">
+      <article class="card card--accent"><h3>This week <span class="tag tag--on">try</span></h3><ol>
+        <li>Use three habits: one task per session, point don't paste, fewer tools</li>
+        <li>Create a repository from the ClaimsDesk template, clone your copy and run one exercise from its docs</li>
+        <li>Send the questions we did not get to - we will answer by email</li></ol></article>
+      <article class="card card--primary"><h3>Next 90 days <span class="tag tag--scheduled">plan</span></h3><ol>
+        <li>Paved road: adapt the <code>.github/</code> pattern for your .NET/API and React stack</li>
+        <li>Enable Copilot code review in Azure Repos for selected repositories; review AI-credit usage and tune effort levels</li>
+        <li>Plan a focused AI hackathon with Copilot access, sandboxes and pre-event training</li></ol></article>
+      <article class="card card--good"><h3>Ongoing <span class="tag tag--off">rhythm</span></h3><ol>
+        <li>Share instructions, skills and agents that work across teams</li>
+        <li>Review AI-credit usage alongside model and effort policies</li>
+        <li>Keep instruction files short and reviewed like code</li></ol></article>
+    </div>
+    <div class="closing">
+      <h3>Questions?</h3>
+      <p>Siya Khumalo, Senior Solution Engineer, Microsoft - siyakhumalo@microsoft.com</p>
+    </div>
+    <aside class="notes" aria-label="Speaker notes for page 12">
+      <h3>Speaker notes <span class="timecheck"></span></h3>
+      <ul>
+        <li>Q&amp;A segment: a moderator reads the top chat questions.</li>
+        <li>Keep the terminals open so you can answer by showing.</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+<!-- ============ PAGE 13 ============ -->
+<section class="page" id="p13" aria-labelledby="p13-title" data-title="Appendix" data-agenda-title="Appendix - glossary, repository and sources" data-minutes="ref">
+  <div class="page-body">
+    <p class="page-kicker"><span class="pn">Page 13 of 13</span><span class="time time--ref">reference - not presented</span></p>
+    <h2 class="page-title" id="p13-title" tabindex="-1">Appendix</h2>
+    <p class="lead">Glossary, how to use the demo repository, points to confirm and the sources behind this document.</p>
+    <h3 class="section-h">A. Glossary</h3>
+    <dl class="glossary">
+      <div><dt>Agent mode</dt><dd>Copilot plans and makes multi-step changes, running tools and commands with your approval.</dd></div>
+      <div><dt>Custom agent</dt><dd>A role defined in <code>.github/agents/*.agent.md</code>: instructions, a limited tool list, optional sub-agents and handoffs.</dd></div>
+      <div><dt>Sub-agent</dt><dd>An agent called by another; it works in its own context window and returns a summary.</dd></div>
+      <div><dt>Skill</dt><dd>A folder with <code>SKILL.md</code> holding know-how or a reusable task procedure Copilot loads when relevant. This demo uses skills, not prompt files, for reusable task playbooks; invoke them by name in Copilot Chat, such as <code>/add-endpoint</code>.</dd></div>
+      <div><dt>Path instructions</dt><dd>Instructions that apply to files matching an <code>applyTo</code> pattern.</dd></div>
+      <div><dt>MCP</dt><dd>Model Context Protocol - the standard way to connect Copilot to tools such as Azure DevOps, Jira or a browser.</dd></div>
+      <div><dt>Copilot cloud agent</dt><dd>Formerly the Copilot coding agent: works in the cloud on an assigned task and returns a pull request.</dd></div>
+      <div><dt>AI Credits</dt><dd>The unit Copilot usage is billed in since 1 June 2026 (1 credit = $0.01), based on tokens.</dd></div>
+    </dl>
+    <h3 class="section-h">B. Using the demo repository</h3>
+    <p>Open the <a href="https://github.com/siyakhumalodev/copilot-best-practices-demo">public ClaimsDesk template</a> and select <strong>Use this template &rarr; Create a new repository</strong>. Clone your new repository, then run the commands below from its root.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Demo repository commands</caption>
+        <thead><tr><th scope="col">Purpose</th><th scope="col">Command</th></tr></thead>
+        <tbody>
+          <tr><td>One-time setup (add <code>--ado-org &lt;org&gt;</code> or <code>--jira</code> for those MCP servers)</td><td><code>node scripts/setup.mjs</code></td></tr>
+          <tr><td>Run the API and the web app</td><td><code>dotnet run --project src/ClaimsDesk.Api</code> · <code>npm run dev --prefix src/web</code></td></tr>
+          <tr><td>Readiness check</td><td><code>node scripts/preflight.mjs</code></td></tr>
+          <tr><td>Back to the starting point (discards uncommitted changes in demo code, tests and <code>.github/</code>)</td><td><code>node scripts/reset-demo.mjs --yes</code></td></tr>
+          <tr><td>Context on or off (A/B exercise)</td><td><code>node scripts/demo.mjs context-off</code> · <code>context-on</code></td></tr>
+          <tr><td>Review exercise branch</td><td><code>node scripts/demo.mjs review-setup</code> · <code>review-cleanup</code></td></tr>
+          <tr><td>Split into two repositories</td><td><code>node scripts/split-repos.mjs</code></td></tr>
+        </tbody>
+      </table>
+      <p class="tbl-note">Start with docs/DEMO-RUNBOOK.md and docs/EXERCISES.md in the repository.</p>
+    </div>
+    <h3 class="section-h">C. Adapting the demo to your organisation</h3>
+    <ul class="check-list prose">
+      <li>Set the session goals, format and expectations for recording or sharing.</li>
+      <li>Confirm which issue-tracking integrations are available and approved for use.</li>
+      <li>Select repositories for code review and identify the correct billing owner.</li>
+      <li>Review network and security requirements before enabling remote MCP endpoints.</li>
+      <li>Plan access, training and support for your development teams.</li>
+    </ul>
+    <h3 class="section-h">D. Sources and further reading</h3>
+    <ol class="sources">
+      <li><a class="plainurl" href="https://github.com/events/universe/recap">https://github.com/events/universe/recap</a></li>
+      <li><a class="plainurl" href="https://github.blog/news-insights/company-news/github-universe-2026-evolving-every-layer-of-the-stack/">https://github.blog/news-insights/company-news/github-universe-2026-evolving-every-layer-of-the-stack/</a></li>
+      <li><a class="plainurl" href="https://gray-dune-057d53303.2.azurestaticapps.net/">https://gray-dune-057d53303.2.azurestaticapps.net/</a></li>
+      <li><a class="plainurl" href="https://github.blog/news-insights/company-news/github-copilot-is-moving-to-usage-based-billing/">https://github.blog/news-insights/company-news/github-copilot-is-moving-to-usage-based-billing/</a></li>
+      <li><a class="plainurl" href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">https://code.visualstudio.com/docs/agent-customization/custom-instructions</a></li>
+      <li><a class="plainurl" href="https://code.visualstudio.com/docs/agent-customization/custom-agents">https://code.visualstudio.com/docs/agent-customization/custom-agents</a></li>
+      <li><a class="plainurl" href="https://code.visualstudio.com/docs/agents/run/subagents">https://code.visualstudio.com/docs/agents/run/subagents</a></li>
+      <li><a class="plainurl" href="https://code.visualstudio.com/docs/agents/reference/mcp-configuration">https://code.visualstudio.com/docs/agents/reference/mcp-configuration</a></li>
+      <li><a class="plainurl" href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference</a></li>
+      <li><a class="plainurl" href="https://docs.github.com/en/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review">https://docs.github.com/en/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/azure/devops/repos/git/copilot-code-reviews?view=azure-devops">https://learn.microsoft.com/en-us/azure/devops/repos/git/copilot-code-reviews?view=azure-devops</a></li>
+      <li><a class="plainurl" href="https://devblogs.microsoft.com/devops/azure-devops-and-github-start-your-agentic-journey-where-you-are/">https://devblogs.microsoft.com/devops/azure-devops-and-github-start-your-agentic-journey-where-you-are/</a></li>
+      <li><a class="plainurl" href="https://github.blog/changelog/2026-11-17-copilot-code-review-adaptive-effort-secret-detection-and-more/">https://github.blog/changelog/2026-11-17-copilot-code-review-adaptive-effort-secret-detection-and-more/</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/azure/devops/mcp-server/remote-mcp-server?view=azure-devops">https://learn.microsoft.com/en-us/azure/devops/mcp-server/remote-mcp-server?view=azure-devops</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/azure/devops/boards/github/work-item-integration-github-copilot?view=azure-devops">https://learn.microsoft.com/en-us/azure/devops/boards/github/work-item-integration-github-copilot?view=azure-devops</a></li>
+      <li><a class="plainurl" href="https://docs.github.com/en/copilot/how-tos/copilot-integrations/integrate-cloud-agent-with-jira">https://docs.github.com/en/copilot/how-tos/copilot-integrations/integrate-cloud-agent-with-jira</a></li>
+      <li><a class="plainurl" href="https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/">https://support.atlassian.com/atlassian-ai-gateway/docs/get-started-with-the-atlassian-remote-mcp-server/</a></li>
+      <li><a class="plainurl" href="https://docs.github.com/en/copilot/concepts/enterprise/mcp-management">https://docs.github.com/en/copilot/concepts/enterprise/mcp-management</a></li>
+      <li><a class="plainurl" href="https://playwright.dev/docs/getting-started-mcp">https://playwright.dev/docs/getting-started-mcp</a></li>
+      <li><a class="plainurl" href="https://learn.github.com/certifications">https://learn.github.com/certifications</a></li>
+      <li><a class="plainurl" href="https://learn.github.com/skills">https://learn.github.com/skills</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/training/paths/copilot/">https://learn.microsoft.com/en-us/training/paths/copilot/</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/training/paths/gh-copilot-2/">https://learn.microsoft.com/en-us/training/paths/gh-copilot-2/</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/credentials/applied-skills/accelerate-app-development-by-using-github-copilot/">https://learn.microsoft.com/en-us/credentials/applied-skills/accelerate-app-development-by-using-github-copilot/</a></li>
+      <li><a class="plainurl" href="https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/">https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-apps-and-agents-developer-associate/</a></li>
+    </ol>
+    <p class="appendix-note">Product names, availability and status are based on public GitHub, Microsoft and Atlassian documentation. Copilot code review for Azure Repos is generally available; preview features can change. The demo uses a fictional company, synthetic data and simplified rules.</p>
+  </div>
+  <footer class="page-foot">
+    <p class="colophon">Microsoft · GitHub Copilot best practices · Fictional demo data · Product details may change</p>
+    <div class="pager"></div>
+  </footer>
+</section>
+
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+     Generic leave-behind runtime. No customer- or topic-specific logic
+     belongs here. Builds navigation, agenda, counters, pagers and time
+     checks from the <section class="page"> elements, then handles hash
+     routing, keyboard shortcuts, notes, presenter mode, theme and print.
+     Optional page-specific scripts go in a SEPARATE <script> after this one.
+     ===================================================================== */
+
+  function clampIndex(i, total) { return Math.max(0, Math.min(total - 1, i)); }
+  function minutesOf(p) {
+    var m = (p.getAttribute('data-minutes') || '').trim();
+    if (m === '' || m.toLowerCase() === 'ref') { return null; }
+    var n = Number(m);
+    return isFinite(n) && n >= 0 ? n : null;
+  }
+  function badgeText(p) { var m = minutesOf(p); return m === null ? 'ref' : m + ' min'; }
+  function titleOf(p) {
+    var t = p.getAttribute('data-title');
+    if (t) { return t; }
+    var h = p.querySelector('.page-title');
+    return h ? h.textContent.trim() : p.id;
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (text !== undefined && text !== null) { e.textContent = text; }
+    return e;
+  }
+
+  if (typeof document === 'undefined') { return; }
+
+  var html = document.documentElement;
+  var docId = (html.getAttribute('data-doc-id') || 'document').replace(/[^a-z0-9_-]/gi, '-').toLowerCase();
+  var STORE_PREFIX = 'leave-behind-' + docId + '-';
+  function store(k, v) { try { window.localStorage.setItem(STORE_PREFIX + k, v); } catch (e) { /* storage unavailable */ } }
+  function read(k) { try { return window.localStorage.getItem(STORE_PREFIX + k); } catch (e) { return null; } }
+
+  var pages = Array.prototype.slice.call(document.querySelectorAll('main .page'));
+  var total = pages.length;
+  if (!total) { return; }
+  var current = 0;
+
+  /* ---------- Build: navigation list ---------- */
+  var navlist = document.getElementById('navlist');
+  if (navlist) {
+    navlist.textContent = '';
+    pages.forEach(function (p, i) {
+      var li = el('li');
+      var a = el('a');
+      a.href = '#' + p.id;
+      a.appendChild(el('span', 'n', String(i + 1)));
+      a.appendChild(el('span', null, titleOf(p)));
+      a.appendChild(el('span', 'badge', badgeText(p)));
+      li.appendChild(a);
+      navlist.appendChild(li);
+    });
+  }
+  var navLinks = navlist ? Array.prototype.slice.call(navlist.querySelectorAll('a')) : [];
+
+  /* ---------- Build: cover agenda + total ---------- */
+  var agenda = document.getElementById('agenda-list');
+  var presentedTotal = 0;
+  pages.forEach(function (p) { var m = minutesOf(p); if (m !== null) { presentedTotal += m; } });
+  if (agenda) {
+    agenda.textContent = '';
+    pages.forEach(function (p, i) {
+      if (i === 0 || p.classList.contains('page--cover')) { return; }
+      var li = el('li');
+      li.appendChild(el('span', 'n', String(i + 1)));
+      var a = el('a', null, p.getAttribute('data-agenda-title') || titleOf(p));
+      a.href = '#' + p.id;
+      li.appendChild(a);
+      li.appendChild(el('span', 'mins', badgeText(p)));
+      agenda.appendChild(li);
+    });
+  }
+  var agendaTotal = document.getElementById('agenda-total');
+  if (agendaTotal) { agendaTotal.textContent = '≈ ' + presentedTotal + ' min + Q&A'; }
+
+  /* ---------- Build: per-page kicker, pager and time check ---------- */
+  var elapsed = 0;
+  pages.forEach(function (p, i) {
+    var m = minutesOf(p);
+    var pn = p.querySelector('.page-kicker .pn');
+    if (pn) { pn.textContent = 'Page ' + (i + 1) + ' of ' + total; }
+    var time = p.querySelector('.page-kicker .time');
+    if (time) {
+      time.classList.toggle('time--ref', m === null);
+      time.textContent = m === null ? 'reference - not presented' : m + ' min';
+    }
+    if (m !== null) { elapsed += m; }
+    var tc = p.querySelector('.notes .timecheck');
+    if (tc && !tc.hasAttribute('data-fixed')) {
+      if (i === 0) { tc.textContent = 'Time check: 0 min - start'; }
+      else if (m === null) { tc.textContent = 'Reference page - not presented'; }
+      else { tc.textContent = 'Time check: ' + elapsed + ' min elapsed at end of page'; }
+    }
+    var pager = p.querySelector('.page-foot .pager');
+    if (pager) {
+      pager.textContent = '';
+      if (i > 0) {
+        var prev = el('a', 'btn btn--ghost', '← Previous');
+        prev.href = '#' + pages[i - 1].id;
+        pager.appendChild(prev);
+      }
+      pager.appendChild(el('span', 'pager-pos', (i + 1) + ' / ' + total));
+      if (i < total - 1) {
+        var nextPage = pages[i + 1];
+        var isLastRef = (i + 1 === total - 1) && minutesOf(nextPage) === null;
+        var next = el('a', 'btn', (isLastRef ? titleOf(nextPage) : 'Next') + ' →');
+        next.href = '#' + nextPage.id;
+        pager.appendChild(next);
+      }
+    }
+  });
+
+  /* ---------- Page navigation ---------- */
+  var progressFill = document.getElementById('progress-fill');
+  var progress = document.getElementById('progress');
+  var counter = document.getElementById('page-counter');
+  var sidenav = document.getElementById('sidenav');
+  var navToggle = document.getElementById('nav-toggle');
+  var btnNotes = document.getElementById('btn-notes');
+  var btnPresenter = document.getElementById('btn-presenter');
+  var btnTheme = document.getElementById('btn-theme');
+  var btnPrint = document.getElementById('btn-print');
+  if (progress) { progress.setAttribute('aria-valuemax', String(total)); }
+
+  function indexFromHash(hash) {
+    if (!hash) { return -1; }
+    var id = hash.charAt(0) === '#' ? hash.slice(1) : hash;
+    for (var i = 0; i < total; i++) { if (pages[i].id === id) { return i; } }
+    return -1;
+  }
+
+  function openNav() { if (sidenav) { sidenav.classList.add('open'); } if (navToggle) { navToggle.setAttribute('aria-expanded', 'true'); } }
+  function closeNav() { if (sidenav) { sidenav.classList.remove('open'); } if (navToggle) { navToggle.setAttribute('aria-expanded', 'false'); } }
+
+  function show(i, opts) {
+    opts = opts || {};
+    i = clampIndex(i, total);
+    current = i;
+    pages.forEach(function (p, k) { p.classList.toggle('is-active', k === i); });
+    navLinks.forEach(function (a, k) {
+      if (k === i) { a.setAttribute('aria-current', 'page'); } else { a.removeAttribute('aria-current'); }
+    });
+    var pct = ((i + 1) / total) * 100;
+    if (progressFill) { progressFill.style.width = pct + '%'; }
+    if (progress) {
+      progress.setAttribute('aria-valuenow', String(i + 1));
+      progress.setAttribute('aria-valuetext', 'Page ' + (i + 1) + ' of ' + total);
+    }
+    if (counter) { counter.textContent = (i + 1) + ' / ' + total; }
+    var id = pages[i].id;
+    if (opts.updateHash !== false && window.location.hash !== '#' + id) {
+      try { window.history.replaceState(null, '', '#' + id); } catch (e) { /* sandboxed */ }
+    }
+    if (opts.scroll !== false) { window.scrollTo(0, 0); }
+    if (opts.focus) {
+      var title = pages[i].querySelector('.page-title');
+      if (title) { try { title.focus({ preventScroll: true }); } catch (e) { title.focus(); } }
+    }
+    if (opts.closeNav) { closeNav(); }
+    var active = navLinks[i];
+    if (active && sidenav && typeof active.scrollIntoView === 'function' && sidenav.scrollHeight > sidenav.clientHeight) {
+      try { active.scrollIntoView({ block: 'nearest' }); } catch (e) { /* ignore */ }
+    }
+  }
+
+  /* ---------- Toggles ---------- */
+  function setNotes(on) {
+    html.classList.toggle('notes-open', on);
+    if (btnNotes) { btnNotes.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+  }
+  function toggleNotes() { setNotes(!html.classList.contains('notes-open')); }
+
+  function setPresenter(on) {
+    html.classList.toggle('presenter', on);
+    if (btnPresenter) { btnPresenter.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    store('presenter', on ? '1' : '0');
+  }
+  function togglePresenter() { setPresenter(!html.classList.contains('presenter')); }
+
+  var THEMES = ['light', 'dark', 'auto'];           // light is the default; dark on request; auto follows the OS
+  var THEME_LABEL = { light: 'Light', dark: 'Dark', auto: 'Auto (follows OS)' };
+  function setTheme(t, persist) {
+    if (THEMES.indexOf(t) < 0) { t = 'light'; }
+    html.setAttribute('data-theme', t);
+    if (btnTheme) {
+      btnTheme.textContent = 'Theme: ' + THEME_LABEL[t];
+      btnTheme.setAttribute('aria-label', 'Theme: ' + THEME_LABEL[t] + '. Press to change');
+    }
+    if (persist) { store('theme-choice', t); }
+  }
+  function cycleTheme() {
+    var cur = html.getAttribute('data-theme') || 'light';
+    setTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length], true);
+  }
+
+  if (btnNotes) { btnNotes.addEventListener('click', toggleNotes); }
+  if (btnPresenter) { btnPresenter.addEventListener('click', togglePresenter); }
+  if (btnTheme) { btnTheme.addEventListener('click', cycleTheme); }
+  if (btnPrint) { btnPrint.addEventListener('click', function () { window.print(); }); }
+  if (navToggle) {
+    navToggle.addEventListener('click', function () {
+      if (sidenav && sidenav.classList.contains('open')) { closeNav(); } else { openNav(); }
+    });
+  }
+
+  /* ---------- In-page links (nav, agenda, prev/next) ---------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    var a = (t && t.closest) ? t.closest('a[href^="#"]') : null;
+    if (!a) { return; }
+    var idx = indexFromHash(a.getAttribute('href'));
+    if (idx < 0) { return; }
+    e.preventDefault();
+    show(idx, { focus: true, closeNav: true });
+  });
+
+  window.addEventListener('hashchange', function () {
+    var idx = indexFromHash(window.location.hash);
+    if (idx >= 0 && idx !== current) { show(idx, { updateHash: false, focus: true }); }
+  });
+
+  /* ---------- Keyboard ---------- */
+  function isEditable(node) {
+    if (!node || !node.tagName) { return false; }
+    var tag = node.tagName.toLowerCase();
+    return tag === 'input' || tag === 'select' || tag === 'textarea' || node.isContentEditable === true;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) { return; }
+    var editing = isEditable(e.target);
+    var isSelect = editing && e.target.tagName.toLowerCase() === 'select';
+    switch (e.key) {
+      case 'ArrowRight':
+        if (editing) { return; }
+        e.preventDefault(); show(current + 1, { focus: true }); break;
+      case 'PageDown':
+        if (isSelect) { return; }
+        e.preventDefault(); show(current + 1, { focus: true }); break;
+      case 'ArrowLeft':
+        if (editing) { return; }
+        e.preventDefault(); show(current - 1, { focus: true }); break;
+      case 'PageUp':
+        if (isSelect) { return; }
+        e.preventDefault(); show(current - 1, { focus: true }); break;
+      case 'Home':
+        if (editing) { return; }
+        e.preventDefault(); show(0, { focus: true }); break;
+      case 'End':
+        if (editing) { return; }
+        e.preventDefault(); show(total - 1, { focus: true }); break;
+      case 'n': case 'N':
+        if (editing) { return; }
+        e.preventDefault(); toggleNotes(); break;
+      case 'p': case 'P':
+        if (editing) { return; }
+        e.preventDefault(); togglePresenter(); break;
+      case 'Escape':
+        if (html.classList.contains('notes-open')) { setNotes(false); }
+        closeNav();
+        break;
+      default: break;
+    }
+  });
+
+  /* ---------- Init ---------- */
+  setTheme(read('theme-choice') || 'light', false);
+  setPresenter(read('presenter') === '1');
+  setNotes(false);
+  var start = indexFromHash(window.location.hash);
+  show(start >= 0 ? start : 0, { updateHash: false, scroll: false });
+  if (start >= 0) {
+    var resetScroll = function () { window.scrollTo(0, 0); };
+    window.addEventListener('load', resetScroll);
+    window.setTimeout(resetScroll, 0);
+  }
+})();
+</script>
+
+</body>
+</html>
