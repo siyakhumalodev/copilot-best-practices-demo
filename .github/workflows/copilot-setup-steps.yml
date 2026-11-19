@@ -1,0 +1,46 @@
+# Prepares the environment for the GitHub Copilot cloud agent, so it can build ClaimsDesk and run every test suite.
+# The job MUST be called copilot-setup-steps.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Restore .NET packages
+        run: dotnet restore
+
+      - name: Install web dependencies
+        working-directory: src/web
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install Playwright Chromium (with OS dependencies)
+        working-directory: src/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke build
+        run: dotnet build -nologo -v q

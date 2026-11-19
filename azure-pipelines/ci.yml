@@ -1,0 +1,85 @@
+# Deterministic checks only - no AI in the CI critical path.
+# The same API and web checks as .github/workflows/ci.yml, for Azure Pipelines.
+# For Azure Repos, PR validation is set by a branch policy (Build validation on main), not by the pr trigger below;
+# the pr trigger applies to GitHub repositories.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: api
+    displayName: API - build and test (.NET)
+    jobs:
+      - job: build_and_test
+        displayName: Build and test
+        timeoutInMinutes: 15
+        steps:
+          - checkout: self
+
+          - task: UseDotNet@2
+            displayName: Use .NET 10 SDK
+            inputs:
+              packageType: sdk
+              version: 10.0.x
+
+          - script: dotnet restore
+            displayName: Restore
+
+          - script: dotnet build --no-restore -c Release -nologo
+            displayName: Build
+
+          - script: dotnet test --no-build -c Release -nologo --logger "console;verbosity=minimal" --logger trx --results-directory "$(Agent.TempDirectory)/test-results"
+            displayName: Test
+
+          - task: PublishTestResults@2
+            displayName: Publish test results
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: VSTest
+              testResultsFiles: '**/*.trx'
+              searchFolder: $(Agent.TempDirectory)/test-results
+
+  - stage: web
+    displayName: Web - lint, typecheck, test, build
+    dependsOn: []
+    jobs:
+      - job: lint_test_build
+        displayName: Lint, typecheck, test and build
+        timeoutInMinutes: 15
+        steps:
+          - checkout: self
+
+          - task: UseNode@1
+            displayName: Use Node.js 22
+            inputs:
+              version: 22.x
+
+          - script: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+            displayName: Install dependencies
+            workingDirectory: src/web
+
+          - script: npm run lint
+            displayName: Lint
+            workingDirectory: src/web
+
+          - script: npm run typecheck
+            displayName: Typecheck
+            workingDirectory: src/web
+
+          - script: npm test
+            displayName: Unit tests
+            workingDirectory: src/web
+
+          - script: npm run build
+            displayName: Build
+            workingDirectory: src/web

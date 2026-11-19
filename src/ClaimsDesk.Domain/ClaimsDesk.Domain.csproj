@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Business rules in plain C# (no ASP.NET Core). Shared settings are in Directory.Build.props. -->
+
+</Project>

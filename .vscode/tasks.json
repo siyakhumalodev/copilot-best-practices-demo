@@ -1,0 +1,74 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "api: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/src/ClaimsDesk.Api/ClaimsDesk.Api.csproj", "-nologo", "-v", "q"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "api: run",
+      "detail": "http://localhost:5080",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["run", "--project", "${workspaceFolder}/src/ClaimsDesk.Api"],
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "api: watch",
+      "detail": "Rebuilds and restarts the API when C# files change",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["watch", "--project", "${workspaceFolder}/src/ClaimsDesk.Api"],
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "web: dev",
+      "detail": "http://localhost:5173 (proxies /api to the API)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "options": { "cwd": "${workspaceFolder}/src/web" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "test: api",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "-nologo", "-v", "q"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "test: web",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test", "--prefix", "src/web"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "test: all",
+      "detail": "dotnet test, then npm test in src/web",
+      "dependsOn": ["test: api", "test: web"],
+      "dependsOrder": "sequence",
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "demo: preflight",
+      "detail": "Readiness check before a live session",
+      "type": "process",
+      "command": "node",
+      "args": ["scripts/preflight.mjs"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.reviewSelection.instructions": [
+    { "file": ".github/skills/code-review/SKILL.md" }
+  ],
+  "chat.useAgentsMdFile": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bin": true,
+    "**/obj": true,
+    "scripts/review-fixture/**": true
+  },
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "dotnet.defaultSolution": "ClaimsDesk.slnx",
+  "typescript.tsdk": "src/web/node_modules/typescript/lib",
+  "editor.formatOnSave": true
+}

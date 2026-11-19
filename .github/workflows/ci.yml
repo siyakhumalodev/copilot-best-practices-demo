@@ -1,0 +1,110 @@
+# Deterministic checks only - no AI in the CI critical path.
+# Agents write and review code; this pipeline builds it and runs the tests, the same way every time.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API - build and test (.NET)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release -nologo
+
+      - name: Test
+        run: dotnet test --no-build -c Release -nologo --logger "console;verbosity=minimal"
+
+  web:
+    name: Web - lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright)
+    if: github.event_name == 'workflow_dispatch'
+    needs: [api, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Build the API
+        run: |
+          dotnet restore
+          dotnet build --no-restore -nologo
+
+      - name: Install web dependencies
+        working-directory: src/web
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install Playwright Chromium
+        working-directory: src/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        working-directory: src/web
+        env:
+          E2E_API_CMD: dotnet run --no-build --project ../ClaimsDesk.Api/ClaimsDesk.Api.csproj --urls http://localhost:5080
+        run: npm run e2e
+
+      - name: Upload the Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: src/web/playwright-report/
+          if-no-files-found: ignore
